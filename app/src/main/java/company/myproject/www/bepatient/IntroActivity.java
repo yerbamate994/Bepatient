@@ -21,14 +21,14 @@ public class IntroActivity extends AppCompatActivity {
         // 인트로 화면 텍스트에 커스텀 폰트 적용
         mIntroText.setTypeface(Typeface.createFromAsset(getAssets(), "fonts/nanumpen.ttf"));
 
-        // MainActivity로의 전환
+        // TotalActivity로의 전환
         Handler mHandler = new Handler();
         mHandler.postDelayed(new Runnable() {
             //Do Something
             @Override
             public void run() {
                 // TODO Auto-generated method stub
-                Intent intent = new Intent(IntroActivity.this, MainActivity.class);
+                Intent intent = new Intent(IntroActivity.this, TotalActivity.class);
                 startActivity(intent);
             }
         }, 2000); // 밀리세컨드(1000분의 1초)
