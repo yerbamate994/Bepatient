@@ -28,7 +28,7 @@ public class IntroActivity extends AppCompatActivity {
             @Override
             public void run() {
                 // TODO Auto-generated method stub
-                Intent intent = new Intent(IntroActivity.this, TotalActivity.class);
+                Intent intent = new Intent(IntroActivity.this, MainActivity.class);
                 startActivity(intent);
             }
         }, 2000); // 밀리세컨드(1000분의 1초)
