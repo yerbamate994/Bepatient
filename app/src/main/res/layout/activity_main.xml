@@ -16,7 +16,7 @@
             android:id="@+id/my_toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="?attr/colorPrimary"
+            android:background="@color/colorPrimary"
             android:elevation="4dp"
             android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
             app:popupTheme="@style/ThemeOverlay.AppCompat.Light">
@@ -27,7 +27,7 @@
                 android:layout_height="wrap_content"
                 android:text="Be patient"
                 android:textAppearance="@style/Base.TextAppearance.Widget.AppCompat.Toolbar.Title"
-                android:textColor="#FFFFFF" />
+                android:textColor="@android:color/white" />
 
         </android.support.v7.widget.Toolbar>
 
@@ -37,8 +37,9 @@
             android:layout_height="wrap_content"
             app:tabGravity="fill"
             app:tabMode="fixed"
-            app:tabSelectedTextColor="#FF0000"
-            app:tabTextColor="#FFFFFF">
+            app:tabSelectedTextColor="@android:color/darker_gray"
+            app:tabTextColor="@android:color/white"
+            app:tabBackground="@color/colorPrimary">
 
         </android.support.design.widget.TabLayout>
 

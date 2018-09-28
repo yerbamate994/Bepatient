@@ -10,12 +10,12 @@ import android.view.ViewGroup;
 /**
  *
  */
-public class Tab03_TestFragment extends android.support.v4.app.Fragment {
+public class Tab04_EmptyFragment extends android.support.v4.app.Fragment {
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_tab03, container, false);
+        View view = inflater.inflate(R.layout.fragment_tab04, container, false);
 
         return view;
     }
