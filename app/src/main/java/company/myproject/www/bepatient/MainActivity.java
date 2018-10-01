@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -32,17 +33,18 @@ public class MainActivity extends AppCompatActivity {
     private ViewPager mViewPager;
     private SharedPreferences pref;
     private SharedPreferences.Editor edit;
-    private boolean swState;
+    private boolean swState; // 스위치 상태 저장용
+    private NotificationGenerator mNotiGenerator; // 노티피케이션 실행을 위한 클래스
 
-    private Intent notiIntent;
-    private PendingIntent notiPend;
-
+    private Context mContext; // 전역 컨텍스트
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Log.d(TAG, "onCreate: Starting");
+        Log.d(TAG, "onCreate : Starting");
+
+        mContext = this;
 
         // 툴바 관련
         Toolbar mToolbar = findViewById(R.id.my_toolbar);
@@ -55,10 +57,8 @@ public class MainActivity extends AppCompatActivity {
         TabLayout tabLayout = findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(mViewPager); // 어댑터가 달린 뷰페이저를 탭 레이아웃에 장착
 
-        // 노티피케이션 터치시 액티비티 실행을 위한 펜딩인텐트 설정
-        notiIntent = new Intent(getApplicationContext(), MainActivity.class);
-        notiIntent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP); // 액티비티 중복 실행을 막기 위한 플래그
-        notiPend = PendingIntent.getActivity(getApplicationContext(), 0, notiIntent, FLAG_CANCEL_CURRENT); // FLAG_CANCEL_CURRENT 없애면 액티비티 중복 생성됨. 어디서 펜딩인텐트가 여러번 호출되는듯.
+        // 노티피케이션 실행을 위한 클래스 객체 생성
+        mNotiGenerator = new NotificationGenerator(mContext);
     }
 
     // SharedPreferences를 활용하여 switch 상태를 저장하기 위함.
@@ -66,7 +66,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
-        edit.putBoolean("switchState", swState); // SharedPrefereces에 상태 저장
+        edit.putBoolean("saveState", swState); // SharedPrefereces에 상태 저장
         edit.apply();
     }
 
@@ -87,19 +87,21 @@ public class MainActivity extends AppCompatActivity {
         View swLayout = menu.findItem(R.id.mySwitch).getActionView(); // menu에서 findItem으로 item을 가져오고 거기서 Action되는 View를 가져옴.
         Switch mSwitch = swLayout.findViewById(R.id.switchForToolBar); // Action되는 View로부터 스위치 View로 접근.
 
-        mSwitch.setChecked(pref.getBoolean("switchState", false)); // 스위치 초기상태 설정. 저장된 상태가 있다면 그걸로, 없으면 초기값으로.
-        swState = pref.getBoolean("switchState", false); // 스위치를 바꾸지 않고 종료했을 경우에도(리스너가 동작하지 않았을때에도) 상태를 남기기 위하여
+        mSwitch.setChecked(pref.getBoolean("saveState", false)); // 스위치 초기상태 설정. 저장된 상태가 있다면 그걸로, 없으면 초기값으로.
+        swState = pref.getBoolean("saveState", false); // 스위치를 바꾸지 않고 종료했을 경우에도(리스너가 동작하지 않았을때에도) 상태를 남기기 위하여
         mSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
 
                 // 스위치 상태에 따른 반응
                 if(isChecked) {
+                    Log.d(TAG, "onCheckedChanged : true");
                     swState = isChecked; // 스위치 상태 저장
-                    notificationControl(isChecked); // 노티피케이션 실행
+                    mNotiGenerator.notificationControl(isChecked); // 노티피케이션 실행
                 } else {
+                    Log.d(TAG, "onCheckedChanged : false");
                     swState = isChecked; // 스위치 상태 저장
-                    notificationControl(isChecked); // 노티피케이션 정지
+                    mNotiGenerator.notificationControl(isChecked); // 노티피케이션 정지
                 }
             }
         });
@@ -115,30 +117,5 @@ public class MainActivity extends AppCompatActivity {
         adapter.addFragment(new Tab03_EmptyFragment(), "빈탭03");
         adapter.addFragment(new Tab04_EmptyFragment(), "빈탭04");
         viewPager.setAdapter(adapter);
-    }
-
-    // 노티피케이션 실행을 위한 설정 함수
-    private void notificationControl(boolean isChecked) {
-        NotificationManager mNotificationManager =
-                (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-
-        // 노티피케이션 실행
-        if(isChecked) {
-
-            // 노티피케이션 설정
-            NotificationCompat.Builder mBuilder =
-                    new NotificationCompat.Builder(getApplicationContext(), "M_CH_ID")
-                            .setSmallIcon(R.drawable.icon_noti)
-                            .setContentTitle("Be patient 실행 중")
-                            .setContentText("화면 켜짐 횟수 체크 중")
-                            .setContentIntent(notiPend);
-            Notification mNotification = mBuilder.build();
-            mNotification.flags = Notification.FLAG_NO_CLEAR;
-            mNotificationManager.notify(0, mNotification); // 노티피케이션 등록
-        }
-        else { // 노티피케이션 정지
-            mNotificationManager.cancel(0);
-        }
-
     }
 }
