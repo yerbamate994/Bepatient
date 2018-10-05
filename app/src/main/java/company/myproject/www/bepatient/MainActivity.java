@@ -1,30 +1,20 @@
 package company.myproject.www.bepatient;
 
 import android.app.Activity;
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
-import android.support.v4.app.NotificationCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.CompoundButton;
-import android.widget.RelativeLayout;
 import android.widget.Switch;
-import android.widget.Toast;
-
-import static android.app.PendingIntent.FLAG_CANCEL_CURRENT;
-import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -34,9 +24,8 @@ public class MainActivity extends AppCompatActivity {
     private SharedPreferences pref;
     private SharedPreferences.Editor edit;
     private boolean swState; // 스위치 상태 저장용
-    private NotificationGenerator mNotiGenerator; // 노티피케이션 실행을 위한 클래스
-
     private Context mContext; // 전역 컨텍스트
+    private Intent serviceIntent; // 서비스 실행용 인텐트
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,8 +46,8 @@ public class MainActivity extends AppCompatActivity {
         TabLayout tabLayout = findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(mViewPager); // 어댑터가 달린 뷰페이저를 탭 레이아웃에 장착
 
-        // 노티피케이션 실행을 위한 클래스 객체 생성
-        mNotiGenerator = new NotificationGenerator(mContext);
+        // 서비스 실행용 인텐트 정의
+        serviceIntent = new Intent(MainActivity.this, ScreenCountService.class);
     }
 
     // SharedPreferences를 활용하여 switch 상태를 저장하기 위함.
@@ -97,11 +86,11 @@ public class MainActivity extends AppCompatActivity {
                 if(isChecked) {
                     Log.d(TAG, "onCheckedChanged : true");
                     swState = isChecked; // 스위치 상태 저장
-                    mNotiGenerator.notificationControl(isChecked); // 노티피케이션 실행
+                    startService(serviceIntent); // 화면 켜짐 카운트 서비스 실행
                 } else {
                     Log.d(TAG, "onCheckedChanged : false");
                     swState = isChecked; // 스위치 상태 저장
-                    mNotiGenerator.notificationControl(isChecked); // 노티피케이션 정지
+                    stopService(serviceIntent); // 화면 켜짐 카운트 서비스 중지
                 }
             }
         });
@@ -112,7 +101,7 @@ public class MainActivity extends AppCompatActivity {
     // 탭 뷰페이저 : 받은 뷰페이저 객체에 프레그먼트와 타이틀 정보가 담긴 어댑터 객체를 세트
     private void setupViewPager(ViewPager viewPager) {
         SectionsPageAdapter adapter = new SectionsPageAdapter(getSupportFragmentManager());
-        adapter.addFragment(new Tab01_EmptyFragment(), "빈탭01");
+        adapter.addFragment(new Tab01_MainFragment(), "빈탭01");
         adapter.addFragment(new Tab02_EmptyFragment(), "빈탭02");
         adapter.addFragment(new Tab03_EmptyFragment(), "빈탭03");
         adapter.addFragment(new Tab04_EmptyFragment(), "빈탭04");

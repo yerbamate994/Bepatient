@@ -11,7 +11,7 @@ import android.view.ViewGroup;
  * 1번 탭
  * OnOff 스위치 버튼 기능 구현
  */
-public class Tab01_EmptyFragment extends android.support.v4.app.Fragment {
+public class Tab01_MainFragment extends android.support.v4.app.Fragment {
 
     @Nullable
     @Override
