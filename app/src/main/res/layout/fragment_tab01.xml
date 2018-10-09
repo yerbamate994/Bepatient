@@ -9,23 +9,14 @@
     <RelativeLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        >
+        android:layout_centerInParent="true">
 
     <TextView
-        android:id="@+id/mainText"
+        android:id="@+id/screenOnCount"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="화면 켜짐 횟수 : "
-        android:textSize="32dp"
-        />
-
-    <TextView
-        android:layout_toRightOf="@id/mainText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="0 회"
-        android:textSize="32dp"
+        android:text=""
+        android:textSize="128dp"
         />
     </RelativeLayout>
 

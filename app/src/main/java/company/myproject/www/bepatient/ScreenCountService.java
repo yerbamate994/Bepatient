@@ -4,8 +4,10 @@ import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Binder;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
@@ -16,35 +18,61 @@ import static android.app.PendingIntent.FLAG_CANCEL_CURRENT;
 public class ScreenCountService extends Service {
 
     public static final String TAG = "ScreenCountService";
+
     private BroadcastReceiver mReceiver;
     private IntentFilter mIntentFilter;
+    private int screenOnCount = 0; // 화면켜짐횟수 누적시킬 변수
 
-    // 서비스가 시작되면 onStartCommand가 호출 됨.
+    IBinder mBinder = new ScreenCountBinder(); // 바인더 객체 생성
+    class ScreenCountBinder extends Binder {
+        ScreenCountService getService() { // 서비스 객체를 리턴
+            return ScreenCountService.this;
+        }
+    }
+
     @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
+    public void onCreate() {
+        super.onCreate();
+        Log.d(TAG, "onCreate");
 
         startForeground(1, setNotification()); // TaskKiller에 서비스가 죽지 않도록 하기 위하여
         // + 노티피케이션 실행
 
-        mReceiver = new LockScreenStateReceiver(); // 화면켜짐 액션 받을 리시버 객체 생성
+        // 화면켜짐액션 받을 리시버 등록
+        mReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if(intent.getAction().equals(Intent.ACTION_USER_PRESENT)) {
+                    screenOnCount++; // 화면켜짐 카운트
+                    Log.d(TAG, "testCount is # " + screenOnCount);
+                }
+            }
+        };
         mIntentFilter = new IntentFilter(Intent.ACTION_USER_PRESENT); // 화면 켜짐(잠금화면 풀린 상태) 액션 필터 등록
         registerReceiver(mReceiver, mIntentFilter); // 브로드캐스트 리시버 등록
+    }
 
+    @Nullable
+    @Override
+    public IBinder onBind(Intent intent) {
+        Log.d(TAG, "onBind");
+
+        return mBinder;
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        Log.d(TAG, "onStartCommand");
         return super.onStartCommand(intent, flags, startId);
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
+        Log.d(TAG, "onDestroy");
 
         stopForeground(true); // Foreground 죽이고, 노티피케이션도 죽임.
         unregisterReceiver(mReceiver); // 리시버 등록 해제
-    }
-
-    @Nullable
-    @Override
-    public IBinder onBind(Intent intent) {
-        return null;
     }
 
     // 노티피케이션 설정 함수
@@ -73,5 +101,10 @@ public class ScreenCountService extends Service {
         mNotification.flags = Notification.FLAG_NO_CLEAR; // 노티피케이션 삭제 안 되도록 플래그 설정
 
         return mNotification; // 완성된 노티피케이션 덩어리를 리턴
+    }
+
+    // 화면켜짐횟수 누적 변수 반환용 함수
+    public int getScreenOnCount() {
+        return screenOnCount;
     }
 }

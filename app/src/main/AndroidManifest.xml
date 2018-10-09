@@ -23,8 +23,6 @@
         <!-- Service -->
         <service android:name=".ScreenCountService" />
 
-        <!-- Receiver -->
-
     </application>
 
 </manifest>

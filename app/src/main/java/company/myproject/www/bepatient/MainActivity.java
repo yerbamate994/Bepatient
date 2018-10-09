@@ -1,10 +1,13 @@
 package company.myproject.www.bepatient;
 
 import android.app.Activity;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
@@ -25,7 +28,25 @@ public class MainActivity extends AppCompatActivity {
     private SharedPreferences.Editor edit;
     private boolean swState; // 스위치 상태 저장용
     private Context mContext; // 전역 컨텍스트
-    private Intent serviceIntent; // 서비스 실행용 인텐트
+    //private Intent serviceIntent; // 서비스 실행용 인텐트
+
+    ScreenCountService countService; // 화면켜짐카운트 서비스
+    boolean isService = false; // 서비스 실행 확인
+    ServiceConnection conn = new ServiceConnection() {
+        // 서비스와 연결되었을 때 호출되는 메서드
+        @Override
+        public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+            ScreenCountService.ScreenCountBinder serviceBinder = (ScreenCountService.ScreenCountBinder) iBinder;
+            countService = serviceBinder.getService(); // 서비스 객체를 받음
+            isService = true; // 서비스 실행 여부 판단
+        }
+
+        // 예기치 않게 서비스와 연결이 끊기거나 종료되었을 때 호출되는 메서드. unbindService했다고 호출되지는 x.
+        @Override
+        public void onServiceDisconnected(ComponentName componentName) {
+            isService = false; // 서비스 실행 여부 판단
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,9 +66,6 @@ public class MainActivity extends AppCompatActivity {
         setupViewPager(mViewPager); // 아직 어댑터가 담기지 않은 뷰페이저 전달
         TabLayout tabLayout = findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(mViewPager); // 어댑터가 달린 뷰페이저를 탭 레이아웃에 장착
-
-        // 서비스 실행용 인텐트 정의
-        serviceIntent = new Intent(MainActivity.this, ScreenCountService.class);
     }
 
     // SharedPreferences를 활용하여 switch 상태를 저장하기 위함.
@@ -79,18 +97,20 @@ public class MainActivity extends AppCompatActivity {
         mSwitch.setChecked(pref.getBoolean("saveState", false)); // 스위치 초기상태 설정. 저장된 상태가 있다면 그걸로, 없으면 초기값으로.
         swState = pref.getBoolean("saveState", false); // 스위치를 바꾸지 않고 종료했을 경우에도(리스너가 동작하지 않았을때에도) 상태를 남기기 위하여
         mSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            Intent intent = new Intent(getApplicationContext(), ScreenCountService.class);
+
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
-
-                // 스위치 상태에 따른 반응
-                if(isChecked) {
+                if(isChecked) { // 스위치 on
                     Log.d(TAG, "onCheckedChanged : true");
                     swState = isChecked; // 스위치 상태 저장
-                    startService(serviceIntent); // 화면 켜짐 카운트 서비스 실행
-                } else {
+                    bindService(intent, conn, Context.BIND_AUTO_CREATE); // 서비스 시작
+                } else { // 스위치 off
                     Log.d(TAG, "onCheckedChanged : false");
                     swState = isChecked; // 스위치 상태 저장
-                    stopService(serviceIntent); // 화면 켜짐 카운트 서비스 중지
+                    if(isService) { // 현재 서비스가 돌고 있다면
+                        unbindService(conn); // 서비스 종료
+                    }
                 }
             }
         });
@@ -101,7 +121,7 @@ public class MainActivity extends AppCompatActivity {
     // 탭 뷰페이저 : 받은 뷰페이저 객체에 프레그먼트와 타이틀 정보가 담긴 어댑터 객체를 세트
     private void setupViewPager(ViewPager viewPager) {
         SectionsPageAdapter adapter = new SectionsPageAdapter(getSupportFragmentManager());
-        adapter.addFragment(new Tab01_MainFragment(), "빈탭01");
+        adapter.addFragment(new Tab01_CountFragment(), "카운트");
         adapter.addFragment(new Tab02_EmptyFragment(), "빈탭02");
         adapter.addFragment(new Tab03_EmptyFragment(), "빈탭03");
         adapter.addFragment(new Tab04_EmptyFragment(), "빈탭04");
