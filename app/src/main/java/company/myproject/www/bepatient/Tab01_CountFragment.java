@@ -1,6 +1,7 @@
 package company.myproject.www.bepatient;
 
 import android.app.Fragment;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -26,23 +27,23 @@ public class Tab01_CountFragment extends android.support.v4.app.Fragment {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_tab01, container, false);
 
+//        Handler mHandler = new Handler(); // 실시간으로 숫자가 변화함을 보이기 위한 핸들러
+//        mHandler.postDelayed(new Runnable() {
+//            //Do Something
+//            @Override
+//            public void run() {
+//                // TODO Auto-generated method stub
+//                FragmentTransaction ft = getChildFragmentManager().beginTransaction();
+//                ft.detach(Tab01_CountFragment.this).attach(Tab01_CountFragment.this).commitAllowingStateLoss();
+//            }
+//        }, 1000); // 밀리세컨드(1000분의 1초)
+
         TextView mTextView = view.findViewById(R.id.screenOnCount); // 텍스트뷰 접근
 
-        Handler mHandler = new Handler(); // 실시간으로 숫자가 변화함을 보이기 위한 핸들러
-        mHandler.postDelayed(new Runnable() {
-            //Do Something
-            @Override
-            public void run() {
-                // TODO Auto-generated method stub
-                FragmentTransaction ft = getActivity().getSupportFragmentManager().beginTransaction();
-                ft.detach(Tab01_CountFragment.this).attach(Tab01_CountFragment.this).commitAllowingStateLoss();
-            }
-        }, 1000); // 밀리세컨드(1000분의 1초)
-
+        // 텍스트 변경
         if(!((MainActivity)getActivity()).isService) { // 현재 서비스가 돌고 있지 않으면
             mTextView.setTextSize(32);
-            mTextView.setText("스위치를 켜세요!" +
-                    "");
+            mTextView.setText("No signal");
         } else if(((MainActivity)getActivity()).isService) { // 현재 서비스가 돌고 있으면
             mTextView.setText("" + ((MainActivity)getActivity()).countService.getScreenOnCount());
         }

@@ -7,8 +7,11 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
 import android.support.design.widget.TabLayout;
+import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -22,13 +25,13 @@ import android.widget.Switch;
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";
+    private Context mContext; // MainActivity 컨텍스트
 
     private ViewPager mViewPager;
     private SharedPreferences pref;
     private SharedPreferences.Editor edit;
     private boolean swState; // 스위치 상태 저장용
-    private Context mContext; // 전역 컨텍스트
-    //private Intent serviceIntent; // 서비스 실행용 인텐트
+    private SectionsPageAdapter adapter; // 프래그먼트를 전환시킬 어댑터
 
     ScreenCountService countService; // 화면켜짐카운트 서비스
     boolean isService = false; // 서비스 실행 확인
@@ -62,10 +65,27 @@ public class MainActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayShowTitleEnabled(false); // 타이틀 없애고 커스텀 타이틀 적용
 
         // 탭 : 뷰페이저 with Sections adapter
+        adapter = new SectionsPageAdapter(getSupportFragmentManager()); // 만들어둔 Section... 객체 생성
         mViewPager = findViewById(R.id.container);
         setupViewPager(mViewPager); // 아직 어댑터가 담기지 않은 뷰페이저 전달
         TabLayout tabLayout = findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(mViewPager); // 어댑터가 달린 뷰페이저를 탭 레이아웃에 장착
+
+        // 화면켜짐 카운트 상황을 거의 실시간으로 보여주기 위한 핸들러 구현
+        // 핸들러 이건 지연시켜 실행시키는거지 계속 실행시키는게 아님. 계속 돌릴 방법 강구.
+        Handler mHandler = new Handler(); // 실시간으로 숫자가 변화함을 보이기 위한 핸들러
+        mHandler.postDelayed(new Runnable() {
+            //Do Something
+            @Override
+            public void run() {
+                // TODO Auto-generated method stub
+                Log.d(TAG, "Handler Run");
+                FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+                ft.detach(adapter.getItem(0));
+                ft.attach(adapter.getItem(0));
+                ft.commit();
+            }
+        }, 1000); // 밀리세컨드(1000분의 1초)
     }
 
     // SharedPreferences를 활용하여 switch 상태를 저장하기 위함.
@@ -120,7 +140,6 @@ public class MainActivity extends AppCompatActivity {
 
     // 탭 뷰페이저 : 받은 뷰페이저 객체에 프레그먼트와 타이틀 정보가 담긴 어댑터 객체를 세트
     private void setupViewPager(ViewPager viewPager) {
-        SectionsPageAdapter adapter = new SectionsPageAdapter(getSupportFragmentManager());
         adapter.addFragment(new Tab01_CountFragment(), "카운트");
         adapter.addFragment(new Tab02_EmptyFragment(), "빈탭02");
         adapter.addFragment(new Tab03_EmptyFragment(), "빈탭03");
