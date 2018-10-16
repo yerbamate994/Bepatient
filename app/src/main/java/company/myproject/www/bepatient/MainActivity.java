@@ -33,29 +33,11 @@ public class MainActivity extends AppCompatActivity {
     private boolean swState; // 스위치 상태 저장용
     private SectionsPageAdapter adapter; // 프래그먼트를 전환시킬 어댑터
 
-    ScreenCountService countService; // 화면켜짐카운트 서비스
-    boolean isService = false; // 서비스 실행 확인
-    ServiceConnection conn = new ServiceConnection() {
-        // 서비스와 연결되었을 때 호출되는 메서드
-        @Override
-        public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
-            ScreenCountService.ScreenCountBinder serviceBinder = (ScreenCountService.ScreenCountBinder) iBinder;
-            countService = serviceBinder.getService(); // 서비스 객체를 받음
-            isService = true; // 서비스 실행 여부 판단
-        }
-
-        // 예기치 않게 서비스와 연결이 끊기거나 종료되었을 때 호출되는 메서드. unbindService했다고 호출되지는 x.
-        @Override
-        public void onServiceDisconnected(ComponentName componentName) {
-            isService = false; // 서비스 실행 여부 판단
-        }
-    };
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Log.d(TAG, "onCreate : Starting");
+        Log.d(TAG, "onCreate");
 
         mContext = this;
 
@@ -70,22 +52,12 @@ public class MainActivity extends AppCompatActivity {
         setupViewPager(mViewPager); // 아직 어댑터가 담기지 않은 뷰페이저 전달
         TabLayout tabLayout = findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(mViewPager); // 어댑터가 달린 뷰페이저를 탭 레이아웃에 장착
+    }
 
-        // 화면켜짐 카운트 상황을 거의 실시간으로 보여주기 위한 핸들러 구현
-        // 핸들러 이건 지연시켜 실행시키는거지 계속 실행시키는게 아님. 계속 돌릴 방법 강구.
-        Handler mHandler = new Handler(); // 실시간으로 숫자가 변화함을 보이기 위한 핸들러
-        mHandler.postDelayed(new Runnable() {
-            //Do Something
-            @Override
-            public void run() {
-                // TODO Auto-generated method stub
-                Log.d(TAG, "Handler Run");
-                FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-                ft.detach(adapter.getItem(0));
-                ft.attach(adapter.getItem(0));
-                ft.commit();
-            }
-        }, 1000); // 밀리세컨드(1000분의 1초)
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Log.d(TAG, "onResume");
     }
 
     // SharedPreferences를 활용하여 switch 상태를 저장하기 위함.
@@ -114,8 +86,11 @@ public class MainActivity extends AppCompatActivity {
         View swLayout = menu.findItem(R.id.mySwitch).getActionView(); // menu에서 findItem으로 item을 가져오고 거기서 Action되는 View를 가져옴.
         Switch mSwitch = swLayout.findViewById(R.id.switchForToolBar); // Action되는 View로부터 스위치 View로 접근.
 
-        mSwitch.setChecked(pref.getBoolean("saveState", false)); // 스위치 초기상태 설정. 저장된 상태가 있다면 그걸로, 없으면 초기값으로.
-        swState = pref.getBoolean("saveState", false); // 스위치를 바꾸지 않고 종료했을 경우에도(리스너가 동작하지 않았을때에도) 상태를 남기기 위하여
+        if(pref.getBoolean("saveState", false)) { // 만약 저장된 스위치 상태가 true 라면
+            mSwitch.setChecked(pref.getBoolean("saveState", false)); // 스위치 초기 상태 설정
+        }
+
+        swState = pref.getBoolean("saveState", false); // 스위치 상태 저장
         mSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             Intent intent = new Intent(getApplicationContext(), ScreenCountService.class);
 
@@ -124,13 +99,11 @@ public class MainActivity extends AppCompatActivity {
                 if(isChecked) { // 스위치 on
                     Log.d(TAG, "onCheckedChanged : true");
                     swState = isChecked; // 스위치 상태 저장
-                    bindService(intent, conn, Context.BIND_AUTO_CREATE); // 서비스 시작
+                    startService(intent); // 서비스 시작
                 } else { // 스위치 off
                     Log.d(TAG, "onCheckedChanged : false");
                     swState = isChecked; // 스위치 상태 저장
-                    if(isService) { // 현재 서비스가 돌고 있다면
-                        unbindService(conn); // 서비스 종료
-                    }
+                    stopService(intent);
                 }
             }
         });
