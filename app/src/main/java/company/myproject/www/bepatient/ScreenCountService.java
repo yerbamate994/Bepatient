@@ -23,17 +23,33 @@ public class ScreenCountService extends Service {
     private IntentFilter mIntentFilter;
     private int screenOnCount = 0; // 화면켜짐횟수 누적시킬 변수
 
-    IBinder mBinder = new ScreenCountBinder(); // 바인더 객체 생성
-    class ScreenCountBinder extends Binder {
-        ScreenCountService getService() { // 서비스 객체를 리턴
+    /**
+     * 서비스바인딩을 위한 Binder 구현
+     */
+    private final IBinder mBinder = new ScreenCountBinder(); // 클라이언트로 넘겨줄 Binder
+    public class ScreenCountBinder extends Binder {
+        ScreenCountService getService() {
+            // Return this instance of ScreenCountService so clients can call public methods
             return ScreenCountService.this;
         }
     }
 
+    /**
+     * BindService() 로 호출됐을 경우 onBind 실행
+     */
+    @Nullable
     @Override
-    public void onCreate() {
-        super.onCreate();
-        Log.d(TAG, "onCreate");
+    public IBinder onBind(Intent intent) {
+        Log.d(TAG, "onBind");
+        return mBinder;
+    }
+
+    /**
+     * startService() 로 호출됐을 경우 onStartCommand 실행
+     */
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        Log.d(TAG, "onStartCommand");
 
         startForeground(1, setNotification()); // TaskKiller에 서비스가 죽지 않도록 하기 위하여
         // + 노티피케이션 실행
@@ -50,19 +66,7 @@ public class ScreenCountService extends Service {
         };
         mIntentFilter = new IntentFilter(Intent.ACTION_USER_PRESENT); // 화면 켜짐(잠금화면 풀린 상태) 액션 필터 등록
         registerReceiver(mReceiver, mIntentFilter); // 브로드캐스트 리시버 등록
-    }
 
-    @Nullable
-    @Override
-    public IBinder onBind(Intent intent) {
-        Log.d(TAG, "onBind");
-
-        return mBinder;
-    }
-
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.d(TAG, "onStartCommand");
         return super.onStartCommand(intent, flags, startId);
     }
 
@@ -103,7 +107,10 @@ public class ScreenCountService extends Service {
         return mNotification; // 완성된 노티피케이션 덩어리를 리턴
     }
 
-    // 화면켜짐횟수 누적 변수 반환용 함수
+    /**
+     * method for clients
+     * 화면켜짐횟수를 누적한 변수를 반환하는 함수
+     **/
     public int getScreenOnCount() {
         return screenOnCount;
     }

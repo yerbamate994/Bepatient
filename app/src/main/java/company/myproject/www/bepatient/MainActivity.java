@@ -10,7 +10,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.support.design.widget.TabLayout;
-import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
@@ -33,21 +32,25 @@ public class MainActivity extends AppCompatActivity {
     private boolean swState; // 스위치 상태 저장용
     private SectionsPageAdapter adapter; // 프래그먼트를 전환시킬 어댑터
 
+    /**
+     * ServiceBinding
+     */
     ScreenCountService countService; // 화면켜짐카운트 서비스
-    boolean isService = false; // 서비스 실행 확인
+    boolean mBound = false; // 서비스바인딩 여부 확인
     ServiceConnection conn = new ServiceConnection() {
-        // 서비스와 연결되었을 때 호출되는 메서드
+        // 서비스바인딩 할 때 던져줄 커넥션 객체
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+            // 서비스바인딩 성공
             ScreenCountService.ScreenCountBinder serviceBinder = (ScreenCountService.ScreenCountBinder) iBinder;
-            countService = serviceBinder.getService(); // 서비스 객체를 받음
-            isService = true; // 서비스 실행 여부 판단
+            countService = serviceBinder.getService(); // ScreenCountService에서 구현한 Binder에서 서비스의 함수에 접근할 수 있도록 마련해 둔 getService()에 접근.
+            mBound = true; // 서비스 실행 여부 판단
         }
 
-        // 예기치 않게 서비스와 연결이 끊기거나 종료되었을 때 호출되는 메서드. unbindService했다고 호출되지는 x.
         @Override
         public void onServiceDisconnected(ComponentName componentName) {
-            isService = false; // 서비스 실행 여부 판단
+            // 예기치 않게 서비스와 연결이 끊기거나 종료되었을 때 호출되는 메서드. unbindService했다고 호출되지는 x.
+            mBound = false; // 서비스 실행 여부 판단
         }
     };
 
@@ -121,15 +124,16 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
-                if(isChecked) { // 스위치 on
-                    Log.d(TAG, "onCheckedChanged : true");
+                if(isChecked) { 
+                    // 스위치 on
                     swState = isChecked; // 스위치 상태 저장
                     bindService(intent, conn, Context.BIND_AUTO_CREATE); // 서비스 시작
-                } else { // 스위치 off
-                    Log.d(TAG, "onCheckedChanged : false");
+                } else { 
+                    // 스위치 off
                     swState = isChecked; // 스위치 상태 저장
-                    if(isService) { // 현재 서비스가 돌고 있다면
+                    if(mBound) { // 현재 서비스가 돌고 있다면
                         unbindService(conn); // 서비스 종료
+                        mBound = false; // 서비스바인딩 해제 알림
                     }
                 }
             }

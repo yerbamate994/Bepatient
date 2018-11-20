@@ -1,18 +1,11 @@
 package company.myproject.www.bepatient;
 
-import android.app.Fragment;
-import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.annotation.Nullable;
-import android.support.v4.app.FragmentTransaction;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-
-import org.w3c.dom.Text;
 
 /**
  * 1번 탭
@@ -41,10 +34,10 @@ public class Tab01_CountFragment extends android.support.v4.app.Fragment {
         TextView mTextView = view.findViewById(R.id.screenOnCount); // 텍스트뷰 접근
 
         // 텍스트 변경
-        if(!((MainActivity)getActivity()).isService) { // 현재 서비스가 돌고 있지 않으면
+        if(!((MainActivity)getActivity()).mBound) { // 현재 서비스가 돌고 있지 않으면
             mTextView.setTextSize(32);
             mTextView.setText("No signal");
-        } else if(((MainActivity)getActivity()).isService) { // 현재 서비스가 돌고 있으면
+        } else if(((MainActivity)getActivity()).mBound) { // 현재 서비스가 돌고 있으면
             mTextView.setText("" + ((MainActivity)getActivity()).countService.getScreenOnCount());
         }
 
