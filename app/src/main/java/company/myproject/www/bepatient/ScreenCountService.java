@@ -21,6 +21,7 @@ public class ScreenCountService extends Service {
 
     private BroadcastReceiver mReceiver;
     private IntentFilter mIntentFilter;
+<<<<<<< HEAD
     private int screenOnCount = 0; // 화면켜짐횟수 누적시킬 변수
 
     /**
@@ -33,12 +34,16 @@ public class ScreenCountService extends Service {
             return ScreenCountService.this;
         }
     }
+=======
+    public static int screenOnCount = 0; // 화면켜짐횟수 누적시킬 변수
+>>>>>>> 44382871f05eaca501eeb60dfe5d79fdf1de3e8a
 
     /**
      * BindService() 로 호출됐을 경우 onBind 실행
      */
     @Nullable
     @Override
+<<<<<<< HEAD
     public IBinder onBind(Intent intent) {
         Log.d(TAG, "onBind");
         return mBinder;
@@ -47,6 +52,19 @@ public class ScreenCountService extends Service {
     /**
      * startService() 로 호출됐을 경우 onStartCommand 실행
      */
+=======
+    public void onCreate() {
+        super.onCreate();
+        Log.d(TAG, "onCreate");
+    }
+
+    @Nullable
+    @Override
+    public IBinder onBind(Intent intent) {
+        return null;
+    }
+
+>>>>>>> 44382871f05eaca501eeb60dfe5d79fdf1de3e8a
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.d(TAG, "onStartCommand");
@@ -107,11 +125,16 @@ public class ScreenCountService extends Service {
         return mNotification; // 완성된 노티피케이션 덩어리를 리턴
     }
 
+<<<<<<< HEAD
     /**
      * method for clients
      * 화면켜짐횟수를 누적한 변수를 반환하는 함수
      **/
     public int getScreenOnCount() {
+=======
+    // 화면켜짐횟수 누적 변수 반환용 함수
+    public static int getScreenOnCount() {
+>>>>>>> 44382871f05eaca501eeb60dfe5d79fdf1de3e8a
         return screenOnCount;
     }
 }
