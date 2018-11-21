@@ -32,7 +32,6 @@ public class MainActivity extends AppCompatActivity {
     private boolean swState; // 스위치 상태 저장용
     private SectionsPageAdapter adapter; // 프래그먼트를 전환시킬 어댑터
 
-<<<<<<< HEAD
     /**
      * ServiceBinding
      */
@@ -55,8 +54,6 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
-=======
->>>>>>> 44382871f05eaca501eeb60dfe5d79fdf1de3e8a
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -123,7 +120,6 @@ public class MainActivity extends AppCompatActivity {
                 if(isChecked) { 
                     // 스위치 on
                     swState = isChecked; // 스위치 상태 저장
-<<<<<<< HEAD
                     bindService(intent, conn, Context.BIND_AUTO_CREATE); // 서비스 시작
                 } else { 
                     // 스위치 off
@@ -132,13 +128,6 @@ public class MainActivity extends AppCompatActivity {
                         unbindService(conn); // 서비스 종료
                         mBound = false; // 서비스바인딩 해제 알림
                     }
-=======
-                    startService(intent); // 서비스 시작
-                } else { // 스위치 off
-                    Log.d(TAG, "onCheckedChanged : false");
-                    swState = isChecked; // 스위치 상태 저장
-                    stopService(intent);
->>>>>>> 44382871f05eaca501eeb60dfe5d79fdf1de3e8a
                 }
             }
         });
