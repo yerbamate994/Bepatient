@@ -76,6 +76,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onStart() {
+        super.onStart();
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
         Log.d(TAG, "onResume");
@@ -97,6 +102,8 @@ public class MainActivity extends AppCompatActivity {
         MenuInflater menuInflater = getMenuInflater();
         menuInflater.inflate(R.menu.menu, menu);
 
+        final Intent serviceIntent = new Intent(getApplicationContext(), ScreenCountService.class);
+
         // 스위치 상태를 SharedPrefereces에 저장하기 위한
         pref = getSharedPreferences("pref", Activity.MODE_PRIVATE); // SharedPreferences 생성
         edit = pref.edit(); // SharedPreferences 상태를 수정하기 위한 Editor 생성
@@ -108,23 +115,28 @@ public class MainActivity extends AppCompatActivity {
         Switch mSwitch = swLayout.findViewById(R.id.switchForToolBar); // Action되는 View로부터 스위치 View로 접근.
 
         if(pref.getBoolean("saveState", false)) { // 만약 저장된 스위치 상태가 true 라면
-            mSwitch.setChecked(pref.getBoolean("saveState", false)); // 스위치 초기 상태 설정
+            mSwitch.setChecked(pref.getBoolean("saveState", false)); // 스위치 초기 상태를 On으로 표시
+            if(!mBound) {
+                // 스위치 초기 상태가 On인데 서비스는 바인딩되어 있지 않다면
+                bindService(serviceIntent, conn, Context.BIND_AUTO_CREATE); // 서비스바인드 시작
+            }
         }
 
         swState = pref.getBoolean("saveState", false); // 스위치 상태 저장
         mSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            Intent intent = new Intent(getApplicationContext(), ScreenCountService.class);
 
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
                 if(isChecked) { 
                     // 스위치 on
                     swState = isChecked; // 스위치 상태 저장
-                    bindService(intent, conn, Context.BIND_AUTO_CREATE); // 서비스 시작
+                    bindService(serviceIntent, conn, Context.BIND_AUTO_CREATE); // 서비스바인드 시작
+                    startService(serviceIntent); // 화면켜짐카운트 누적시키는 서비스 시작
                 } else { 
                     // 스위치 off
                     swState = isChecked; // 스위치 상태 저장
-                    if(mBound) { // 현재 서비스가 돌고 있다면
+                    stopService(serviceIntent);
+                    if(mBound) { // 현재 바인드서비스가 돌고 있다면
                         unbindService(conn); // 서비스 종료
                         mBound = false; // 서비스바인딩 해제 알림
                     }

@@ -1,12 +1,10 @@
 package company.myproject.www.bepatient;
 
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.Nullable;
-<<<<<<< HEAD
-=======
 import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
->>>>>>> 44382871f05eaca501eeb60dfe5d79fdf1de3e8a
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -41,16 +39,12 @@ public class Tab01_CountFragment extends android.support.v4.app.Fragment {
         TextView mTextView = view.findViewById(R.id.screenOnCount); // 텍스트뷰 접근
 
         // 텍스트 변경
-<<<<<<< HEAD
         if(!((MainActivity)getActivity()).mBound) { // 현재 서비스가 돌고 있지 않으면
             mTextView.setTextSize(32);
             mTextView.setText("No signal");
         } else if(((MainActivity)getActivity()).mBound) { // 현재 서비스가 돌고 있으면
             mTextView.setText("" + ((MainActivity)getActivity()).countService.getScreenOnCount());
         }
-=======
-        mTextView.setText("" + ScreenCountService.getScreenOnCount());
->>>>>>> 44382871f05eaca501eeb60dfe5d79fdf1de3e8a
 
         return view;
     }
