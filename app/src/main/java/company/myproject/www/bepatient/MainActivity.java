@@ -112,10 +112,10 @@ public class MainActivity extends AppCompatActivity {
         if(loadSwitchState()) { // 만약 저장된 스위치 상태(변수값)가 true 라면(초기값은 false)
             mSwitch.setChecked(true); // 스위치 초기 상태를 On으로 표시
             //if(!loadBindServiceState()) { // 스위치 초기 상태가 On인데 서비스는 바인딩되어 있지 않다면
-//            if(!isBinding) { // 스위치 초기 상태가 On인데 서비스는 바인딩되어 있지 않다면
-//                bindService(serviceIntent, conn, Context.BIND_AUTO_CREATE); // 서비스바인드 시작
-//                //saveBindServiceState(true);
-//            }
+            if(isBinding == null || isBinding == false) { // 스위치 초기 상태가 On인데 서비스는 바인딩되어 있지 않다면
+                bindService(serviceIntent, conn, Context.BIND_AUTO_CREATE); // 서비스바인드 시작
+                //saveBindServiceState(true);
+            }
         }
 
         // 스위치 OnOff 리스너
@@ -128,7 +128,7 @@ public class MainActivity extends AppCompatActivity {
                     saveSwitchState(isChecked); // 스위치 상태를 'pref_MainActivity' 파일에 저장
                 } else { // 스위치 off
                     stopService(serviceIntent);
-                    if(loadBindServiceState()) { // 현재 바인드서비스가 돌고 있다면
+                    if(isBinding) { // 현재 바인드서비스가 돌고 있다면
                         unbindService(conn); // 서비스 종료
                         //saveBindServiceState(false); // 서비스바인딩 상태 저장
                         isBinding = false;

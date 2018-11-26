@@ -75,11 +75,11 @@ public class ScreenCountService extends Service {
         super.onDestroy();
         Log.d(TAG, "onDestroy");
 
-        stopForeground(true); // Foreground 죽이고, 노티피케이션도 죽임.
+        //stopForeground(true); // Foreground 죽이고, 노티피케이션도 죽임.
 
-        if(mReceiver != null) {
-            unregisterReceiver(mReceiver); // 리시버 등록 해제
-        }
+//        if(mReceiver != null) {
+//            unregisterReceiver(mReceiver); // 리시버 등록 해제
+//        }
     }
 
     // 노티피케이션 설정 함수
