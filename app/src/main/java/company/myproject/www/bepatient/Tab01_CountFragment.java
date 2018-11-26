@@ -21,7 +21,7 @@ public class Tab01_CountFragment extends android.support.v4.app.Fragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
-        Log.d(TAG, "Tab01_CountFragment : onCreateView");
+        //Log.d(TAG, "Tab01_CountFragment : onCreateView");
         View view = inflater.inflate(R.layout.fragment_tab01, container, false);
 
         Handler mHandler = new Handler();
@@ -39,11 +39,23 @@ public class Tab01_CountFragment extends android.support.v4.app.Fragment {
         TextView mTextView = view.findViewById(R.id.screenOnCount); // 텍스트뷰 접근
 
         // 텍스트 변경
-        if(!((MainActivity)getActivity()).mBound) { // 현재 서비스가 돌고 있지 않으면
+        Log.d(TAG, "isBinding is : " + ((MainActivity)getActivity()).isBinding);
+        //if(!((MainActivity)getActivity()).loadBindServiceState()) { // 현재 서비스가 돌고 있지 않으면
+//        if(((MainActivity)getActivity()).isBinding != true) { // 현재 서비스가 돌고 있지 않으면
+//            mTextView.setTextSize(32);
+//            mTextView.setText("No signal");
+//        //} else if(((MainActivity)getActivity()).loadBindServiceState()) { // 현재 서비스가 돌고 있으면
+//        } else if(((MainActivity)getActivity()).isBinding) { // 현재 서비스가 돌고 있으면
+//            mTextView.setText("" + ((MainActivity)getActivity()).countService.getScreenOnCount());
+//        }
+
+        if(((MainActivity)getActivity()).isBinding != null &&
+                ((MainActivity)getActivity()).isBinding) { // 현재 서비스바인딩 상태라면
+            mTextView.setText("" + ((MainActivity)getActivity()).countService.getScreenOnCount());
+        //} else if(((MainActivity)getActivity()).loadBindServiceState()) { // 현재 서비스가 돌고 있으면
+        } else { // 서비스바인딩 상태가 아닌 모든 상황에서
             mTextView.setTextSize(32);
             mTextView.setText("No signal");
-        } else if(((MainActivity)getActivity()).mBound) { // 현재 서비스가 돌고 있으면
-            mTextView.setText("" + ((MainActivity)getActivity()).countService.getScreenOnCount());
         }
 
         return view;
