@@ -7,8 +7,10 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
 import android.support.design.widget.TabLayout;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -18,6 +20,9 @@ import android.view.MenuInflater;
 import android.view.View;
 import android.widget.CompoundButton;
 import android.widget.Switch;
+
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -73,11 +78,37 @@ public class MainActivity extends AppCompatActivity {
 
         // 서비스 시작용 인텐트
         serviceIntent = new Intent(getApplicationContext(), ScreenCountService.class);
+
+//        // 실시간으로 화면이 새로고침 되는 것 처럼 보이기 위해 프래그먼트를 삭제했다 추가했다 반복
+//        TimerTask mTimerTask = new TimerTask() {
+//            @Override
+//            public void run() {
+//                runOnUiThread(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        adapter.clearItem();
+//                        adapter.addFragment(new Tab01_CountFragment(), "카운트");
+//                        adapter.addFragment(new Tab02_EmptyFragment(), "빈탭02");
+//                        adapter.addFragment(new Tab03_EmptyFragment(), "빈탭03");
+//                        adapter.addFragment(new Tab04_EmptyFragment(), "빈탭04");
+//                        adapter.notifyDataSetChanged();
+//                    }
+//                });
+//            }
+//        };
+//
+//        Timer mTimer = new Timer();
+//        mTimer.schedule(mTimerTask, 0, 1000);
     }
 
     @Override
     protected void onStart() {
         super.onStart();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
     }
 
     // onStop은 스마트폰 화면만 꺼도 호출 됨.(액티비티가 전면에 없으면 무조건 호출)
@@ -91,7 +122,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        //saveBindServiceState(false); // 어플 종료되면 서비스바인딩도 해제되니까 false로 저장.
+        unbindService(conn); // 어플 종료되면 서비스바인딩 해제(serviceConnectionLeaked 문제 때문)
     }
 
     /**
@@ -158,14 +189,6 @@ public class MainActivity extends AppCompatActivity {
         SharedPreferences pref = getSharedPreferences("pref_MainActivity", Activity.MODE_PRIVATE); // 스위치 상태를 저장해둔 pref 파일 가져오기
         SharedPreferences.Editor editor = pref.edit(); // SharedPreferences 상태를 수정하기 위한 Editor 생성
         editor.putBoolean("switchState", sw); // switchState 변수에 스위치 상태값 저장
-        editor.apply();
-    }
-
-    // 현재 서비스바인딩 상태를 'pref_MainActivity' 파일에 저장시키는 함수
-    private void saveBindServiceState(Boolean mBind) {
-        SharedPreferences pref = getSharedPreferences("pref_MainActivity", Activity.MODE_PRIVATE); // 스위치 상태를 저장해둔 pref 파일 가져오기
-        SharedPreferences.Editor editor = pref.edit(); // SharedPreferences 상태를 수정하기 위한 Editor 생성
-        editor.putBoolean("serviceBindState", mBind);
         editor.apply();
     }
 

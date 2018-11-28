@@ -44,4 +44,6 @@ public class SectionsPageAdapter extends FragmentPagerAdapter {
     public int getCount() {
         return mFragmentList.size();
     }
+
+    public void clearItem() { mFragmentList.clear(); }
 }
